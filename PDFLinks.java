@@ -4,6 +4,7 @@ import java.util.List;
 import java.awt.geom.Rectangle2D;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.interactive.action.PDAction;
@@ -16,11 +17,15 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPa
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageXYZDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
 
+// read PDF files and extract link information:
 // https://stackoverflow.com/questions/38587567/how-to-extract-hyperlink-information-pdfbox?rq=1
 
 // https://github.com/apache/pdfbox/blob/trunk/pdfbox/src/main/java/org/apache/pdfbox/multipdf/Splitter.java#L234
 
 // https://stackoverflow.com/questions/36790374/how-to-find-page-to-jump-to-i-using-pdfbox-2-0-0-and-pdactiongoto
+
+// change PDActionGoTo destination:
+// https://www.javatips.net/api/org.apache.pdfbox.pdmodel.interactive.action.type.pdactiongoto
 
 // wtf am I doing in Java???
 public class PDFLinks {
@@ -29,11 +34,11 @@ public class PDFLinks {
     private static String fmt = "%7s\t%-15s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7d\t%7s\t%7d\t%7d\t%7.3f\t%-32s%n";
 
     private static void listPDFLinks(PDDocument doc, PDPage page, int i) throws IOException {
+	PDDocumentCatalog catalog = doc.getDocumentCatalog();
         List<PDAnnotation> annotations = page.getAnnotations();
         for( PDAnnotation annotation:annotations ){
             if( annotation instanceof PDAnnotationLink ){
                 PDAnnotationLink link = (PDAnnotationLink)annotation;   
-
 		PDRectangle rect = link.getRectangle();
 		float llx = rect.getLowerLeftX();
 		float lly = rect.getLowerLeftY();
@@ -56,26 +61,26 @@ public class PDFLinks {
 		    PDPageDestination pageDestination = null;
 		    if( destination instanceof PDPageDestination ){
 			pageDestination = (PDPageDestination) destination;
-			page = pageDestination.getPage();
+			// page = pageDestination.getPage();
 			int ppage = pageDestination.retrievePageNumber();
 			System.out.printf(fmt, i, "pageDest", llx, lly, urx, ury, width, height, rotation, ppage, 0, 0, 0.0, "");
 		    } else if ( destination instanceof PDNamedDestination ){
 			PDNamedDestination namedDestination = (PDNamedDestination)destination;
 			String dest =  namedDestination.getNamedDestination();
-			pageDestination = doc.getDocumentCatalog().findNamedDestinationPage((PDNamedDestination) namedDestination);
+			pageDestination = catalog.findNamedDestinationPage((PDNamedDestination)namedDestination);
 			if( pageDestination != null ){
 			    int left = 0;
 			    int top = 0;
 			    float zoom = 0.0f;
 			    if( pageDestination instanceof PDPageXYZDestination ){
-				PDPageXYZDestination pageXYZDestination = (PDPageXYZDestination) pageDestination;
+				PDPageXYZDestination pageXYZDestination = (PDPageXYZDestination)pageDestination;
 				left = pageXYZDestination.getLeft();
 				top = pageXYZDestination.getTop();
 				zoom = pageXYZDestination.getZoom();
 			    }
-			    page = pageDestination.getPage();
+			    // page = pageDestination.getPage();
 			    int npage = pageDestination.retrievePageNumber();
-			    System.out.printf(fmt, i, "namedDest", llx, lly, urx, ury, width, height, rotation, npage, left, top, zoom,dest);
+			    System.out.printf(fmt, i, "namedDest", llx, lly, urx, ury, width, height, rotation, npage, left, top, zoom, dest);
 			} else {
 			    System.out.printf(fmt, i, "UNKNOWN", llx, lly, urx, ury, width, height, rotation, 0, 0, 0.0, "N/A", "N/A");
 			}
