@@ -8,6 +8,7 @@
 *.class
 foo*
 goo*
+doit
 TODO
 BUGS
 .DS_Store
