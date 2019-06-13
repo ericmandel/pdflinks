@@ -5,7 +5,7 @@ PROGS =		PDFLinks.class
 all:		$(PROGS)
 
 PDFLinks.class:	PDFLinks.java
-		javac PDFLinks.java
+		javac -Xlint PDFLinks.java
 
 installjar:	FORCE
 		@(mkdir -p $(JARDIR) && cp -p jarfiles/*.jar $(JARDIR)/.)
