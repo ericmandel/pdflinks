@@ -5,12 +5,14 @@
 *.pyc
 *-orig
 *-sav
+*.class
 foo*
 goo*
 TODO
 BUGS
 .DS_Store
 a.out.dSYM/
+links.log
 tmp/
 test/
 notes/
