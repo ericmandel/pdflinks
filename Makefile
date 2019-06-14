@@ -14,6 +14,6 @@ view-readme:	FORCE
 		@(grip)
 
 clean:		FORCE
-		@($(RM) foo* *~ *.bak */*~ $(PROGS))
+		@($(RM) foo* *~ *.bak */*~)
 
 FORCE:
