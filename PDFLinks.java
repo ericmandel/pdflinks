@@ -51,10 +51,13 @@ public class PDFLinks {
     private static void usage(){
 	System.out.printf("usage:%n");
 	System.out.printf("  # list existing links in pdf file%n");
-	System.out.printf("  java PDFlinks pdffile%n");
+	System.out.printf("  java PDFlinks [pdffile]%n");
 	System.out.printf("%n");
-	System.out.printf("  # add links in list file to pdf file%n");
-	System.out.printf("  java PDFlinks ipdffile opdffile listfile%n");
+	System.out.printf("  # list existing links in pdf file%n");
+	System.out.printf("  java PDFlinks [pdffile] links%n");
+	System.out.printf("%n");
+	System.out.printf("  # add links in link text file to pdf file%n");
+	System.out.printf("  java PDFlinks [ipdffile] [opdffile] [links.txt]%n");
 	System.out.printf("%n");
     }
 
@@ -220,13 +223,19 @@ public class PDFLinks {
 	PDPage page = doc.getPage(i);
 	int rotation = page.getRotation();
         List<PDAnnotation> annotations = page.getAnnotations();
+	// output header, if necessary
+	if( i == 0 ){
+	   // output header
+	   System.out.printf(fmt0, "onPage", "linkType", "rectLLX", "rectLLY", "rectURX", "rectURY", "rectWid", "rectHt", "rectRot", "toPage", "toLeft", "toTop", "toZoom", "namedDestOrURI");
+	   System.out.printf(fmt0, "------", "---------------", "-------", "-------", "-------", "-------", "-------", "-------", "-------", "------", "------", "-----", "------", "--------------");
+	}
 	// the logic below is adapted from:
 	// https://github.com/apache/pdfbox/blob/trunk/pdfbox/src/main/java/org/apache/pdfbox/multipdf/Splitter.java#L234
 	// and:
 	// https://stackoverflow.com/questions/36790374/how-to-find-page-to-jump-to-i-using-pdfbox-2-0-0-and-pdactiongoto
 	// https://stackoverflow.com/questions/38587567/how-to-extract-hyperlink-information-pdfbox
 	// for each annotation ...
-        for( PDAnnotation annotation:annotations ){
+        for( PDAnnotation annotation : annotations ){
 	    // if the annotation is a link ...
             if( annotation instanceof PDAnnotationLink ){
 		// get common information
@@ -309,12 +318,24 @@ public class PDFLinks {
        if( argv.length == 1 ){
 	   // 1 arg: display links
 	   doc = PDDocument.load(new File(argv[0]));
-	   // output header
-	   System.out.printf(fmt0, "onPage", "linkType", "rectLLX", "rectLLY", "rectURX", "rectURY", "rectWid", "rectHt", "rectRot", "toPage", "toLeft", "toTop", "toZoom", "namedDestOrURI");
-	   System.out.printf(fmt0, "------", "---------------", "-------", "-------", "-------", "-------", "-------", "-------", "-------", "------", "------", "-----", "------", "--------------");
 	   // list links in all pages
 	   for(int i = 0; i < doc.getNumberOfPages(); i++){
 	       listLinks(doc, i);
+	   }
+	   doc.close();
+       } else if( argv.length == 2 ){
+	   // 1 arg: display links
+	   doc = PDDocument.load(new File(argv[0]));
+	   switch(argv[1].trim()){
+	   case "links":
+	       // list links in all pages
+	       for(int i = 0; i < doc.getNumberOfPages(); i++){
+		   listLinks(doc, i);
+	       }
+	       break;
+	   default:
+	       usage();
+	       System.exit(1);
 	   }
 	   doc.close();
        } else if( argv.length == 3 ){
