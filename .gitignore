@@ -5,7 +5,6 @@
 *.pyc
 *-orig
 *-sav
-*.class
 foo*
 goo*
 doit
