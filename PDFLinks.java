@@ -1,3 +1,25 @@
+/*
+ *
+ * PDFLINKS: extract the links and the link-less destinations from a PDF file
+ *           add URI and GoTo links to a PDF file
+ * usage:
+ *   # list existing links and anchors in pdf file
+ *   java PDFlinks [pdffile]
+ *
+ *   # list existing links in pdf file
+ *   java PDFlinks [pdffile] links
+ *
+ *   # list anchors in pdf file
+ *   java PDFlinks [pdffile] anchors
+ *
+ *   # add links in link text file to pdf file
+ *   java PDFlinks [ipdffile] [opdffile] [links.txt]
+ *
+ * E. Mandel, A. Vikhlinin
+ *
+ * 6/17/2019
+ *
+ */
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
