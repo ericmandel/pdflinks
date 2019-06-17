@@ -29,7 +29,7 @@ To run:
     export PDFLINKS_DEBUG=1
 
     # add links to a previously-stripped file
-    java PDFLinks i_stripped.pdf o_stripped_withlinks.pdf links.txt
+    java PDFLinks i_stripped.pdf o_withlinks.pdf links.txt
 
 What's the license?
 -------------------
