@@ -1,12 +1,17 @@
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDNameTreeNode;
+import org.apache.pdfbox.pdmodel.PDDestinationNameTreeNode;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
@@ -50,11 +55,14 @@ public class PDFLinks {
     // the ever-present
     private static void usage(){
 	System.out.printf("usage:%n");
-	System.out.printf("  # list existing links in pdf file%n");
+	System.out.printf("  # list existing links and anchors in pdf file%n");
 	System.out.printf("  java PDFlinks [pdffile]%n");
 	System.out.printf("%n");
 	System.out.printf("  # list existing links in pdf file%n");
 	System.out.printf("  java PDFlinks [pdffile] links%n");
+	System.out.printf("%n");
+	System.out.printf("  # list anchors in pdf file%n");
+	System.out.printf("  java PDFlinks [pdffile] anchors%n");
 	System.out.printf("%n");
 	System.out.printf("  # add links in link text file to pdf file%n");
 	System.out.printf("  java PDFlinks [ipdffile] [opdffile] [links.txt]%n");
@@ -99,9 +107,19 @@ public class PDFLinks {
 	}
     }
 
+    // output header once
+    private static int nheader = 0;
+    private static void outputHeader(){
+	if( nheader == 0 ){
+	   System.out.printf(fmt0, "onPage", "linkType", "rectLLX", "rectLLY", "rectURX", "rectURY", "rectWid", "rectHt", "rectRot", "toPage", "toLeft", "toTop", "toZoom", "namedDestOrURI");
+	   System.out.printf(fmt0, "------", "---------------", "-------", "-------", "-------", "-------", "-------", "-------", "-------", "------", "------", "-----", "------", "--------------");
+	   nheader = 1;
+	}
+    }
+
     // add a URI-style link to the page
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static void addURILinkToPage(PDPage page, float llx, float lly, float urx, float ury, String uri) throws IOException {
+    private static void addURILinkToPage(PDDocument doc, PDPage page, float llx, float lly, float urx, float ury, String uri) throws IOException {
         PDActionURI action = new PDActionURI();
 	action.setURI(uri);
 
@@ -124,7 +142,7 @@ public class PDFLinks {
 
     // add a Named Destination link to the page
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static void addNamedDestToPage(PDPage page, String destination, float llx, float lly, float urx, float ury, PDPage toPage, int toLeft, int toTop) throws IOException {
+    private static void addNamedDestToPage(PDDocument doc, PDPage page, float llx, float lly, float urx, float ury, PDPage toPage, int toLeft, int toTop, String destination) throws IOException {
 
 	// how to we make a named destination and place it in the right location??
 	// PDNamedDestination dest =  new PDNamedDestination(destination);
@@ -158,7 +176,7 @@ public class PDFLinks {
 
     // add a Page Destination link to the page
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static void addPageDestToPage(PDPage page, float llx, float lly, float urx, float ury, PDPage toPage, int toLeft, int toTop) throws IOException {
+    private static void addPageDestToPage(PDDocument doc, PDPage page, float llx, float lly, float urx, float ury, PDPage toPage, int toLeft, int toTop) throws IOException {
 
 	PDPageXYZDestination pageDest = new PDPageXYZDestination();
 	pageDest.setPage(toPage);
@@ -186,6 +204,30 @@ public class PDFLinks {
 	annotations.add(link);
     }
 
+    // fake an extra page for adding anchors ... not a good solution ...
+    private static PDPage anchorPage = null;
+    // ... so we turn it off
+    private static boolean fakeAnchorLinks = false;
+
+    // add a Anchor Destination to the page
+    // this doesn't work ... and we don't need it, so this is a no-op
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void addAnchorDestToPage(PDDocument doc, PDPage toPage, int toLeft, int toTop, String destination) throws IOException {
+	if( fakeAnchorLinks == true ){
+	    // add page at the end to hold a link to anchors
+	    if( anchorPage == null ){
+		anchorPage = new PDPage();
+		doc.addPage(anchorPage);
+	    }
+	    PDPage page = anchorPage;
+	    float llx = 0.0f;
+	    float lly = 0.0f;
+	    float urx = 0.0f;
+	    float ury = 0.0f;
+	    addPageDestToPage(doc, page, llx, lly, urx, ury, toPage, toLeft, toTop);
+	}
+    }
+
     // addLinks: get link information from line buffer and add the link
     private static void addLinks(PDDocument doc, String tokens[]) throws IOException {
 	PDPage toPage = null;
@@ -198,19 +240,25 @@ public class PDFLinks {
 	float ury = Float.parseFloat(tokens[5]);
 	switch(tokens[1]){
 	case "uri":
-	    addURILinkToPage(page, llx, lly, urx, ury, tokens[13]);
+	    addURILinkToPage(doc, page, llx, lly, urx, ury, tokens[13]);
 	    break;
 	case "namedDest":
 	    toPage = doc.getPage(Integer.parseInt(tokens[9]));
 	    toLeft = Integer.parseInt(tokens[10]);
 	    toTop = Integer.parseInt(tokens[11]);
-	    addNamedDestToPage(page, tokens[13], llx, lly, urx, ury, toPage, toLeft, toTop);
+	    addNamedDestToPage(doc, page, llx, lly, urx, ury, toPage, toLeft, toTop, tokens[13]);
 	    break;
 	case "pageDest":
 	    toPage = doc.getPage(Integer.parseInt(tokens[9]));
 	    toLeft = Integer.parseInt(tokens[10]);
 	    toTop = Integer.parseInt(tokens[11]);
-	    addPageDestToPage(page, llx, lly, urx, ury, toPage, toLeft, toTop);
+	    addPageDestToPage(doc, page, llx, lly, urx, ury, toPage, toLeft, toTop);
+	    break;
+	case "anchorDest":
+	    toPage = doc.getPage(Integer.parseInt(tokens[9]));
+	    toLeft = Integer.parseInt(tokens[10]);
+	    toTop = Integer.parseInt(tokens[11]);
+	    addAnchorDestToPage(doc, toPage, toLeft, toTop, tokens[13]);
 	    break;
 	default:
 	    break;
@@ -222,13 +270,10 @@ public class PDFLinks {
 	PDDocumentCatalog catalog = doc.getDocumentCatalog();
 	PDPage page = doc.getPage(i);
 	int rotation = page.getRotation();
+	// output the header, if necessary
+	outputHeader();
+	// get list of annotations
         List<PDAnnotation> annotations = page.getAnnotations();
-	// output header, if necessary
-	if( i == 0 ){
-	   // output header
-	   System.out.printf(fmt0, "onPage", "linkType", "rectLLX", "rectLLY", "rectURX", "rectURY", "rectWid", "rectHt", "rectRot", "toPage", "toLeft", "toTop", "toZoom", "namedDestOrURI");
-	   System.out.printf(fmt0, "------", "---------------", "-------", "-------", "-------", "-------", "-------", "-------", "-------", "------", "------", "-----", "------", "--------------");
-	}
 	// the logic below is adapted from:
 	// https://github.com/apache/pdfbox/blob/trunk/pdfbox/src/main/java/org/apache/pdfbox/multipdf/Splitter.java#L234
 	// and:
@@ -270,6 +315,12 @@ public class PDFLinks {
 		    if( destination instanceof PDPageDestination ){
 			destStr = "";
 			linkType = "pageDest";
+			if( fakeAnchorLinks == true    &&
+			    anchorPage != null         &&
+			    llx == 0.0f && lly == 0.0f &&
+			    urx == 0.0f && ury == 0.0f ){
+			    linkType = "anchorDest";
+			}
 		    } else if ( destination instanceof PDNamedDestination ){
 			destStr =  ((PDNamedDestination)destination).getNamedDestination();
 			PDPageDestination pageDest = catalog.findNamedDestinationPage((PDNamedDestination)destination);
@@ -297,6 +348,84 @@ public class PDFLinks {
 	}
     }
 
+    private static Map<String, PDPageDestination> getAllNamedDestinations(PDDocument document){
+        Map<String, PDPageDestination> namedDestinations = new HashMap<>(10);
+        // get catalog
+        PDDocumentCatalog documentCatalog = document.getDocumentCatalog();
+        PDDocumentNameDictionary names = documentCatalog.getNames();
+        if( names == null ){
+            return namedDestinations;
+	}
+        PDDestinationNameTreeNode dests = names.getDests();
+        try {
+            if( dests.getNames() != null ){
+                namedDestinations.putAll(dests.getNames());
+	    }
+        } catch(Exception e){ e.printStackTrace(); }
+        List<PDNameTreeNode<PDPageDestination>> kids = dests.getKids();
+        traverseKids(kids, namedDestinations);
+        return namedDestinations;
+    }
+
+    private static void traverseKids(List<PDNameTreeNode<PDPageDestination>> kids, Map<String, PDPageDestination> namedDestinations){
+	if( kids == null ){
+	    return;
+	}
+	try {
+	    for( PDNameTreeNode<PDPageDestination> kid : kids ){
+		if( kid.getNames() != null ){
+		    try {
+			namedDestinations.putAll(kid.getNames());
+		    } catch (Exception e){
+			System.out.println("INFO: Duplicate named destinations in document."); e.printStackTrace();
+		    }
+		}
+		if( kid.getKids() != null ){
+		    traverseKids(kid.getKids(), namedDestinations);
+		}
+	    }
+	} catch( Exception e ){
+	    e.printStackTrace();
+	}
+    }
+
+    // list the "anchors" (link-less destinations)
+    private static void listAnchors(PDDocument doc) throws IOException {
+	int i = 0;
+	float llx = 0.0f;
+	float lly = 0.0f;
+	float urx = 0.0f;
+	float ury = 0.0f;
+	float width = 0;
+	float height = 0;
+	int rotation = 0;
+	// no page info yet
+	int pageno = -1;
+	int left = 0;
+	int top = 0;
+	float zoom = 0.0f;
+	String destStr = "";
+	// no link type
+	String linkType = "anchorDest";
+	// output the header, if necessary
+	outputHeader();
+	Map<String, PDPageDestination> destmap = getAllNamedDestinations(doc);
+	for( Map.Entry<String, PDPageDestination> entry : destmap.entrySet() ){
+	    String key = entry.getKey();
+	    PDPageDestination destination = entry.getValue();
+	    if( destination instanceof PDPageXYZDestination ){
+		left = ((PDPageXYZDestination)destination).getLeft();
+		top = ((PDPageXYZDestination)destination).getTop();
+		zoom = ((PDPageXYZDestination)destination).getZoom();
+	    }
+	    pageno = destination.retrievePageNumber();
+	    // output the link
+	    System.out.printf(fmt, i, linkType,
+			      llx, lly, urx, ury, width, height, rotation,
+			      pageno, left, top, zoom, key);
+	}
+    }
+
     // int main(int argv, char **argv){ would be easier ...
     public static void main (String argv[]) throws IOException {
        PDDocument doc = null;
@@ -319,12 +448,14 @@ public class PDFLinks {
 	   // 1 arg: display links
 	   doc = PDDocument.load(new File(argv[0]));
 	   // list links in all pages
-	   for(int i = 0; i < doc.getNumberOfPages(); i++){
+	   for(int i=0; i<doc.getNumberOfPages(); i++){
 	       listLinks(doc, i);
 	   }
+	   // list all anchors
+	   listAnchors(doc);
 	   doc.close();
        } else if( argv.length == 2 ){
-	   // 1 arg: display links
+	   // 2 args: display request type
 	   doc = PDDocument.load(new File(argv[0]));
 	   switch(argv[1].trim()){
 	   case "links":
@@ -332,6 +463,10 @@ public class PDFLinks {
 	       for(int i = 0; i < doc.getNumberOfPages(); i++){
 		   listLinks(doc, i);
 	       }
+	       break;
+	   case "anchors":
+	       // list "anchors" in all pages
+	       listAnchors(doc);
 	       break;
 	   default:
 	       usage();
