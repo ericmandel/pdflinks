@@ -6,6 +6,7 @@
 *-orig
 *-sav
 *.log
+*.pdf
 foo*
 goo*
 doit
