@@ -6,14 +6,16 @@ Not really meant for public consumption ... but you're welcome to it ...
 Which Java?
 -----------
 
-This code was developed with Java 8 on MacOS. I used the OpenJDK version
-of Java from Azul Systems:
+This code was developed with Java 8 on MacOS. I have successfully used two
+OpenJDK installations:
 
+    # Azul Systems:
     https://www.azul.com/downloads/zulu/
+    https://cdn.azul.com/zulu/bin/zulu8.38.0.13-ca-jdk8.0.212-macosx_x64.dmg
 
-Here is the download link I used:
-
-     https://cdn.azul.com/zulu/bin/zulu8.38.0.13-ca-jdk8.0.212-macosx_x64.dmg
+    # Adopt Open JDK:
+    https://adoptopenjdk.net/
+    https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04/OpenJDK8U-jdk_x64_mac_hotspot_8u212b04.pkg
 
 To install on a Mac:
 --------------------
