@@ -358,8 +358,8 @@ public class PDFLinks {
 			    left = ((PDPageXYZDestination)destination).getLeft();
 			    top = ((PDPageXYZDestination)destination).getTop();
 			    zoom = ((PDPageXYZDestination)destination).getZoom();
+			    pageno = ((PDPageDestination) destination).retrievePageNumber();
 			}
-			pageno = ((PDPageDestination) destination).retrievePageNumber();
 		    }
 		}
 		// output the link
