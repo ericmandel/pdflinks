@@ -6,7 +6,8 @@ Not really meant for public consumption ... but you're welcome to it ...
 Which Java?
 -----------
 
-This code works with Java 8. I used the OpenJDK version from Azul Systems:
+This code was developed with Java 8 on MacOS. I used the OpenJDK version
+of Java from Azul Systems:
 
     https://www.azul.com/downloads/zulu/
 
