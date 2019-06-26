@@ -78,16 +78,16 @@ public class PDFLinks {
     private static void usage(){
 	System.out.printf("usage:%n");
 	System.out.printf("  # list existing links and anchors in pdf file%n");
-	System.out.printf("  java PDFlinks [pdffile]%n");
+	System.out.printf("  java -cp . PDFlinks [pdffile]%n");
 	System.out.printf("%n");
 	System.out.printf("  # list existing links in pdf file%n");
-	System.out.printf("  java PDFlinks [pdffile] links%n");
+	System.out.printf("  java -cp . PDFlinks [pdffile] links%n");
 	System.out.printf("%n");
 	System.out.printf("  # list anchors in pdf file%n");
-	System.out.printf("  java PDFlinks [pdffile] anchors%n");
+	System.out.printf("  java -cp . PDFlinks [pdffile] anchors%n");
 	System.out.printf("%n");
 	System.out.printf("  # add links in link text file to pdf file%n");
-	System.out.printf("  java PDFlinks [ipdffile] [opdffile] [links.txt]%n");
+	System.out.printf("  java -cp . PDFlinks [ipdffile] [opdffile] [links.txt]%n");
 	System.out.printf("%n");
     }
 
