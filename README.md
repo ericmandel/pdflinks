@@ -42,6 +42,12 @@ To run:
     # add links to a previously-stripped file
     java -cp . PDFLinks i_stripped.pdf o_withlinks.pdf links.txt
 
+    # or use the pdflinks script:
+    pdflinks i_file.pdf > links.txt
+    pdflinks i_file.pdf [links|anchors]> links.txt
+    pdflinks i_stripped.pdf o_withlinks.pdf links.txt
+
+
 What's the license?
 -------------------
 
