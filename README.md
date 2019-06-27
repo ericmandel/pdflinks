@@ -6,16 +6,16 @@ Not really meant for public consumption ... but you're welcome to it ...
 Which Java?
 -----------
 
-This code was developed with Java 8 on MacOS. I have successfully used two
-OpenJDK installations:
+This code was developed with Java 8/11 on MacOS. I have successfully used two
+OpenJDK installations of Java 11:
+
+    # Adopt Open JDK (currently in use):
+    https://adoptopenjdk.net/
+    https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.3%2B7/OpenJDK11U-jdk_x64_mac_hotspot_11.0.3_7.pkg
 
     # Azul Systems:
     https://www.azul.com/downloads/zulu/
-    https://cdn.azul.com/zulu/bin/zulu8.38.0.13-ca-jdk8.0.212-macosx_x64.dmg
-
-    # Adopt Open JDK:
-    https://adoptopenjdk.net/
-    https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b04/OpenJDK8U-jdk_x64_mac_hotspot_8u212b04.pkg
+    https://cdn.azul.com/zulu/bin/zulu11.31.11-ca-jdk11.0.3-macosx_x64.dmg
 
 To install on a Mac:
 --------------------
@@ -24,32 +24,23 @@ To install on a Mac:
     git clone https://github.com/ericmandel/pdflinks
     cd pdflinks
 
-    # one time install: jar files
-    make installjar
-
-    # make the class file
+    # generate the PDFLinks.class file
     make
 
-To run:
--------
+To run, use the pdflinks script, which hides the nasty java details:
+--------------------------------------------------------------------
 
     # generate list of existing links and anchors in tab-delimited text format
-    java -cp . PDFLinks i_file.pdf > links.txt
+    pdflinks i_file.pdf > links.txt
 
     # generate list of existing links or anchors in tab-delimited text format
-    java -cp . PDFLinks i_file.pdf [links|anchors]> links.txt
+    pdflinks i_file.pdf [links|anchors]> links.txt
 
     # optional: incorporate debugging style (colored border) when adding links
     export PDFLINKS_DEBUG=1
 
     # add links to a previously-stripped file
-    java -cp . PDFLinks i_stripped.pdf o_withlinks.pdf links.txt
-
-    # or use the pdflinks script:
-    pdflinks i_file.pdf > links.txt
-    pdflinks i_file.pdf [links|anchors]> links.txt
     pdflinks i_stripped.pdf o_withlinks.pdf links.txt
-
 
 What's the license?
 -------------------
