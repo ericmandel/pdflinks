@@ -1,3 +1,4 @@
 #!/bin/bash
 
-java -cp ".:jarfiles/*" PDFLinks $*
+BASE="$(cd "$(dirname "$0")" && pwd)"
+java -cp ".:${BASE}:${BASE}/jarfiles/*" PDFLinks $*
