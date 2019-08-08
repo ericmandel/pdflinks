@@ -70,6 +70,7 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNa
 public class PDFLinks {
 
     private static int DEBUG = 0;
+    private static int borderWidth = 0;
 
     private static String fmt0 = "%7s\t%-15s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%-32s%n";
     private static String fmt = "%7s\t%-15s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7d\t%7s\t%7d\t%7d\t%7.3f\t%-32s%n";
@@ -129,6 +130,13 @@ public class PDFLinks {
 	}
     }
 
+    // set link style
+    private static void setLinkStyle(PDAnnotationLink link){
+	PDBorderStyleDictionary borderULine = new PDBorderStyleDictionary();
+	borderULine.setWidth(borderWidth);
+	link.setBorderStyle(borderULine);
+    }
+
     // output header once
     private static int nheader = 0;
     private static void outputHeader(){
@@ -156,7 +164,10 @@ public class PDFLinks {
 	link.setRectangle(position);
 
 	// DEBUGGING
-	setDebugStyle(link, "cyan");
+	// setDebugStyle(link, "cyan");
+
+	// set link style
+	setLinkStyle(link);
 
 	List annotations = page.getAnnotations();
 	annotations.add(link);
@@ -190,7 +201,10 @@ public class PDFLinks {
 	link.setRectangle(position);
 
 	// DEBUGGING
-	setDebugStyle(link, "red");
+	// setDebugStyle(link, "red");
+
+	// set link style
+	setLinkStyle(link);
 
 	List annotations = page.getAnnotations();
 	annotations.add(link);
@@ -220,7 +234,10 @@ public class PDFLinks {
 	link.setRectangle(position);
 
 	// DEBUGGING
-	setDebugStyle(link, "green");
+	// setDebugStyle(link, "green");
+
+	// set link style
+	setLinkStyle(link);
 
 	List annotations = page.getAnnotations();
 	annotations.add(link);
@@ -495,7 +512,11 @@ public class PDFLinks {
 	       System.exit(1);
 	   }
 	   doc.close();
-       } else if( argv.length == 3 ){
+       } else if( (argv.length == 3) || (argv.length == 4) ){
+	   // 4th arg: border width
+	   if( argv.length == 4 ){
+	       borderWidth = Integer.parseInt(argv[3]);
+	   }
 	   // 3 args: add links
 	   doc = PDDocument.load(new File(argv[0]));
 	   // 3rd arg: text file containing list of links
