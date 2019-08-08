@@ -40,7 +40,7 @@ To run, use the pdflinks script, which hides the nasty java details:
     export PDFLINKS_DEBUG=1
 
     # add links to a previously-stripped file
-    pdflinks i_stripped.pdf o_withlinks.pdf links.txt
+    pdflinks i_stripped.pdf o_withlinks.pdf links.txt [borderWidth (def:0)]
 
 What's the license?
 -------------------
